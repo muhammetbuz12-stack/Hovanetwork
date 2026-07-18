@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ==== server.properties'ten alınan RCON bilgileri ====
-const RCON_HOST = '127.0.0.1'; // sunucu ile aynı makinede çalışıyorsa localhost
+const RCON_HOST = '87.76.146.164'; // sunucu ile aynı makinede çalışıyorsa localhost
 const RCON_PORT = 25575;       // rcon.port
 const RCON_PASSWORD = '32B-21dg-Hgb'; // rcon.password
 // =======================================================
