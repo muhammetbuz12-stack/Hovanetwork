@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Hovanetwork</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+
+  /* ---- LOGIN EKRANI ---- */
+  #loginScreen {
+    background: rgba(0,0,0,0.55);
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    width: 320px;
+  }
+  #loginScreen h1 {
+    margin-top: 0;
+    font-size: 28px;
+  }
+  #loginScreen input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 6px;
+    border: none;
+    font-size: 15px;
+  }
+  #loginScreen button {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #2ecc71;
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  #loginScreen button:hover { background: #27ae60; }
+  #loginError { color: #ff6b6b; margin-top: 10px; font-size: 13px; min-height: 16px; }
+
+  /* ---- MAĞAZA EKRANI ---- */
+  #shopScreen { display: none; width: 100%; max-width: 900px; padding: 20px; }
+  #shopScreen h1 { text-align: center; font-size: 34px; margin-bottom: 5px; }
+  #shopScreen p.sub { text-align: center; opacity: 0.8; margin-top: 0; }
+
+  #playerNameBox {
+    max-width: 400px;
+    margin: 20px auto;
+    text-align: center;
+  }
+  #playerNameBox input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 15px;
+    text-align: center;
+  }
+
+  .ranks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-top: 25px;
+  }
+  .rank-card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+  }
+  .rank-card h2 { margin: 0 0 10px; font-size: 22px; }
+  .rank-card .price { font-size: 26px; font-weight: bold; color: #2ecc71; margin: 10px 0; }
+  .rank-card button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #3498db;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .rank-card button:hover { background: #2980b9; }
+  .rank-card button:disabled { background: #555; cursor: not-allowed; }
+
+  #resultBox {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    min-height: 20px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- LOGIN EKRANI -->
+  <div id="loginScreen">
+    <h1>Hovanetwork</h1>
+    <p>Panele giriş yapmak için şifre girin</p>
+    <input type="password" id="loginPassword" placeholder="Şifre">
+    <button onclick="checkLogin()">Giriş Yap</button>
+    <div id="loginError"></div>
+  </div>
+
+  <!-- MAĞAZA EKRANI -->
+  <div id="shopScreen">
+    <h1>Hovanetwork</h1>
+    <p class="sub">Rank Mağazası</p>
+
+    <div id="playerNameBox">
+      <input type="text" id="playerName" placeholder="Minecraft kullanıcı adınızı girin">
+    </div>
+
+    <div class="ranks">
+      <div class="rank-card">
+        <h2>VIP</h2>
+        <div class="price">100 TL</div>
+        <button onclick="buyRank('vip')">Satın Al</button>
+      </div>
+      <div class="rank-card">
+        <h2>VIP+</h2>
+        <div class="price">150 TL</div>
+        <button onclick="buyRank('vipplus')">Satın Al</button>
+      </div>
+      <div class="rank-card">
+        <h2>HVIP</h2>
+        <div class="price">200 TL</div>
+        <button onclick="buyRank('hvip')">Satın Al</button>
+      </div>
+      <div class="rank-card">
+        <h2>HVIP+</h2>
+        <div class="price">250 TL</div>
+        <button onclick="buyRank('hvipplus')">Satın Al</button>
+      </div>
+      <div class="rank-card">
+        <h2>HOVAVIP</h2>
+        <div class="price">300 TL</div>
+        <button onclick="buyRank('hovavip')">Satın Al</button>
+      </div>
+      <div class="rank-card">
+        <h2>HOVAVIP+</h2>
+        <div class="price">350 TL</div>
+        <button onclick="buyRank('hovavipplus')">Satın Al</button>
+      </div>
+    </div>
+
+    <div id="resultBox"></div>
+  </div>
+
+<script>
+  // Panele giriş şifresi (istediğiniz gibi değiştirebilirsiniz)
+  const LOGIN_PASSWORD = "hovanetwork2026";
+
+  function checkLogin() {
+    const val = document.getElementById('loginPassword').value;
+    if (val === LOGIN_PASSWORD) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('shopScreen').style.display = 'block';
+    } else {
+      document.getElementById('loginError').innerText = 'Yanlış şifre!';
+    }
+  }
+
+  // Enter tuşu ile giriş
+  document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkLogin();
+  });
+
+  async function buyRank(rankId) {
+    const playerName = document.getElementById('playerName').value.trim();
+    const resultBox = document.getElementById('resultBox');
+
+    if (!playerName) {
+      resultBox.style.color = '#ff6b6b';
+      resultBox.innerText = 'Lütfen önce kullanıcı adınızı girin!';
+      return;
+    }
+
+    resultBox.style.color = '#fff';
+    resultBox.innerText = 'İşlem yapılıyor...';
+
+    try {
+      const res = await fetch('/api/buy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerName, rankId })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        resultBox.style.color = '#2ecc71';
+        resultBox.innerText = data.message;
+      } else {
+        resultBox.style.color = '#ff6b6b';
+        resultBox.innerText = data.message;
+      }
+    } catch (err) {
+      resultBox.style.color = '#ff6b6b';
+      resultBox.innerText = 'Sunucuya bağlanılamadı: ' + err.message;
+    }
+  }
+</script>
+
+</body>
+</html>
