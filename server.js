@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { Rcon } = require('rcon-client');
@@ -6,67 +7,84 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ==== server.properties'ten alınan RCON bilgileri ====
-const RCON_HOST = '87.76.146.164'; // sunucu ile aynı makinede çalışıyorsa localhost
-const RCON_PORT = 25575;       // rcon.port
-const RCON_PASSWORD = '32B-21dg-Hgb'; // rcon.password
-// =======================================================
+// ---- Ayarlar (.env dosyasından okunur) ----
+const RCON_HOST = process.env.RCON_HOST || 'Hovanetwork.duckdns.org';
+const RCON_PORT = parseInt(process.env.RCON_PORT || '25575', 10);
+const RCON_PASSWORD = process.env.RCON_PASSWORD || '';
+const ADMIN_KEY = process.env.ADMIN_KEY || '';
+const PORT = process.env.PORT || 3000;
 
-// Ranklar ve fiyatları (TL)
-const RANKS = {
-  vip:        { price: 100, group: 'vip' },
-  vipplus:    { price: 150, group: 'vipplus' },
-  hvip:       { price: 200, group: 'hvip' },
-  hvipplus:   { price: 250, group: 'hvipplus' },
-  hovavip:    { price: 300, group: 'hovavip' },
-  hovavipplus:{ price: 350, group: 'hovavipplus' },
-};
+if (!RCON_PASSWORD) {
+  console.warn('[UYARI] RCON_PASSWORD tanımlı değil. .env dosyanı kontrol et.');
+}
+if (!ADMIN_KEY) {
+  console.warn('[UYARI] ADMIN_KEY tanımlı değil. Admin panel herkese açık kalabilir!');
+}
 
-// Sunucuya RCON komutu gönderen yardımcı fonksiyon
+// RCON'a bağlanıp tek komut çalıştırıp bağlantıyı kapatan yardımcı fonksiyon.
+// Her istekte yeni bağlantı açmak, uzun süre açık kalan bağlantıların
+// düşmesinden kaynaklanan sorunları engeller.
 async function sendRconCommand(command) {
   const rcon = await Rcon.connect({
     host: RCON_HOST,
     port: RCON_PORT,
     password: RCON_PASSWORD,
+    timeout: 5000,
   });
-  const response = await rcon.send(command);
-  await rcon.end();
-  return response;
+  try {
+    const response = await rcon.send(command);
+    return response;
+  } finally {
+    await rcon.end();
+  }
 }
 
-// Rank satın alma endpoint'i
-app.post('/api/buy', async (req, res) => {
-  const { playerName, rankId } = req.body;
-
-  if (!playerName || !rankId) {
-    return res.status(400).json({ success: false, message: 'Oyuncu ismi ve rank gerekli.' });
+// Admin endpoint'lerini korumak için basit anahtar kontrolü.
+// Bu anahtar RCON şifresinden FARKLI olmalı; RCON şifresini
+// hiçbir zaman tarayıcıya/istemciye göndermiyoruz.
+function checkAdmin(req, res, next) {
+  const key = req.headers['x-admin-key'];
+  if (!ADMIN_KEY || key !== ADMIN_KEY) {
+    return res.status(401).json({ error: 'Yetkisiz erişim' });
   }
+  next();
+}
 
-  const rank = RANKS[rankId];
-  if (!rank) {
-    return res.status(400).json({ success: false, message: 'Geçersiz rank.' });
-  }
-
-  // LuckPerms kullanıyorsanız aşağıdaki komut otomatik çalışır.
-  // Farklı bir permission eklentisi kullanıyorsanız komutu değiştirin.
-  const command = `lp user ${playerName} parent add ${rank.group}`;
-
+// Herkese açık: sunucu çevrimiçi mi kontrolü (rakam/isim göndermez)
+app.get('/api/status', async (req, res) => {
   try {
-    const result = await sendRconCommand(command);
-    return res.json({
-      success: true,
-      message: `${playerName} adlı oyuncuya ${rankId.toUpperCase()} rankı verildi.`,
-      rconResponse: result,
-    });
+    await sendRconCommand('list');
+    res.json({ online: true });
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: 'RCON bağlantı hatası: ' + err.message,
-    });
+    res.json({ online: false });
   }
 });
 
-const PORT = 3000;
+// Korumalı: oyuncu listesi
+app.get('/api/players', checkAdmin, async (req, res) => {
+  try {
+    const result = await sendRconCommand('list');
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Korumalı: serbest RCON komutu gönder
+app.post('/api/command', checkAdmin, async (req, res) => {
+  const { command } = req.body;
+  if (!command || typeof command !== 'string') {
+    return res.status(400).json({ success: false, error: 'Komut gerekli' });
+  }
+  try {
+    const result = await sendRconCommand(command);
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
-  console.log(`Hovanetwork paneli http://localhost:${PORT} adresinde çalışıyor`);
+  console.log(`Hovanetwork paneli çalışıyor: http://localhost:${PORT}`);
+  console.log(`RCON hedefi: ${RCON_HOST}:${RCON_PORT}`);
 });
