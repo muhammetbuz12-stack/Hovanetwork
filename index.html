@@ -298,6 +298,103 @@
   }
   footer b{ color: var(--gold); }
 
+  /* ----- KURALLAR ----- */
+  .rules-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 22px;
+  }
+  .rule-block{
+    background: var(--bg-panel);
+    border: 2px solid var(--border);
+    padding: 24px 22px;
+  }
+  .rule-block-title{
+    font-family:'Press Start 2P', monospace;
+    font-size: 13px;
+    color: var(--rule-color, var(--gold));
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+  }
+  .rule-list{ list-style:none; }
+  .rule-list li{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 15px;
+  }
+  .rule-list li:last-child{ border-bottom:none; }
+  .rule-name{ color: var(--text); }
+  .rule-penalty{
+    font-family:'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--rule-color, var(--gold));
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--rule-color, var(--gold));
+    padding: 6px 10px;
+    white-space:nowrap;
+  }
+
+  /* ----- SATIN ALMA MODALI ----- */
+  .modal-overlay{
+    display:none;
+    position:fixed; inset:0; z-index:100;
+    background: rgba(0,0,0,0.72);
+    align-items:center; justify-content:center;
+    padding: 20px;
+  }
+  .modal-overlay.active{ display:flex; }
+  .modal-box{
+    background: var(--bg-panel-2);
+    border: 2px solid var(--gold-dim);
+    padding: 30px;
+    max-width: 380px; width:100%;
+    text-align:center;
+    box-shadow: 0 0 40px var(--gold-glow);
+  }
+  .modal-box .modal-rank{
+    font-family:'Press Start 2P', monospace;
+    font-size: 16px;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .modal-box .modal-price{
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  .modal-box input{
+    width:100%;
+    padding: 12px;
+    background: var(--bg-deep);
+    border: 2px solid var(--border);
+    color: var(--text);
+    font-family:'Rubik',sans-serif;
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .modal-box input:focus{ outline:none; border-color: var(--gold-dim); }
+  .modal-actions{ display:flex; gap:10px; }
+  .modal-actions button{
+    flex:1;
+    font-family:'Press Start 2P', monospace;
+    font-size: 10px;
+    padding: 12px;
+    cursor:pointer;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    transition: .15s;
+  }
+  .modal-actions .confirm{
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .modal-actions .confirm:hover{ background: var(--gold); color:#17140c; }
+  .modal-actions .cancel:hover{ border-color:#ff6b6b; color:#ff6b6b; }
+  .modal-error{ color:#ff6b6b; font-size:12px; min-height:16px; margin-bottom:8px; }
+
   @media (max-width: 560px){
     nav{ gap:4px; padding: 10px 8px; }
     nav .tab{ font-size: 8px; padding: 8px 10px; }
@@ -313,6 +410,7 @@
   <div class="tab" data-tab="yetkili">YETKİLİLER</div>
   <div class="tab" data-tab="kurallar">KURALLAR</div>
   <div class="tab" data-tab="iletisim">İLETİŞİM</div>
+  <div class="tab" data-tab="admin">ADMİN</div>
 </nav>
 
 <header class="hero">
@@ -320,7 +418,7 @@
 
   <div class="info-row">
     <div class="info-chip">
-      <span class="dot"></span>
+      <span class="dot" id="statusDot"></span>
       <span class="label">IP ADRES</span>
       <span class="value" id="ipValue">Hovanetwork.duckdns.org</span>
       <button class="copy-btn" onclick="copyIP()">Kopyala</button>
@@ -328,6 +426,10 @@
     <div class="info-chip">
       <span class="label">SÜRÜM</span>
       <span class="value">1.21.1 - 1.21.11</span>
+    </div>
+    <div class="info-chip">
+      <span class="label">DURUM</span>
+      <span class="value" id="statusText">kontrol ediliyor...</span>
     </div>
   </div>
 
@@ -354,37 +456,37 @@
         <div class="rank-icon"></div>
         <div class="rank-name">VIP</div>
         <div class="rank-price">60₺</div>
-        <button class="rank-buy">SATIN AL</button>
+        <button class="rank-buy" onclick="buyRank('VIP', 60)">SATIN AL</button>
       </div>
       <div class="rank-card" style="--rank-color:#8be08b">
         <div class="rank-icon"></div>
         <div class="rank-name">VIP+</div>
         <div class="rank-price">120₺</div>
-        <button class="rank-buy">SATIN AL</button>
+        <button class="rank-buy" onclick="buyRank('VIP+', 120)">SATIN AL</button>
       </div>
       <div class="rank-card" style="--rank-color:#6ec6f5">
         <div class="rank-icon"></div>
         <div class="rank-name">HVIP</div>
         <div class="rank-price">180₺</div>
-        <button class="rank-buy">SATIN AL</button>
+        <button class="rank-buy" onclick="buyRank('HVIP', 180)">SATIN AL</button>
       </div>
       <div class="rank-card" style="--rank-color:#c48bf5">
         <div class="rank-icon"></div>
         <div class="rank-name">HVIP+</div>
         <div class="rank-price">240₺</div>
-        <button class="rank-buy">SATIN AL</button>
+        <button class="rank-buy" onclick="buyRank('HVIP+', 240)">SATIN AL</button>
       </div>
       <div class="rank-card" style="--rank-color:#f5c518">
         <div class="rank-icon"></div>
         <div class="rank-name">HOVAVIP</div>
         <div class="rank-price">300₺</div>
-        <button class="rank-buy">SATIN AL</button>
+        <button class="rank-buy" onclick="buyRank('HOVAVIP', 300)">SATIN AL</button>
       </div>
       <div class="rank-card" style="--rank-color:#f57a3d">
         <div class="rank-icon"></div>
         <div class="rank-name">HOVAVIP+</div>
         <div class="rank-price">360₺</div>
-        <button class="rank-buy">SATIN AL</button>
+        <button class="rank-buy" onclick="buyRank('HOVAVIP+', 360)">SATIN AL</button>
       </div>
     </div>
   </section>
@@ -432,7 +534,38 @@
 
   <section id="kurallar">
     <div class="section-title">KURALLAR</div>
-    <p class="section-sub">Kural içerikleri yakında eklenecek.</p>
+    <div class="section-sub">Uymayanlar aşağıdaki cezalarla karşılaşır</div>
+
+    <div class="rules-grid">
+
+      <div class="rule-block">
+        <div class="rule-block-title" style="--rule-color:#f5c518;">SÜRELİ MUTELER</div>
+        <ul class="rule-list">
+          <li><span class="rule-name">Küfür</span><span class="rule-penalty" style="--rule-color:#f5c518;">3 Saat</span></li>
+          <li><span class="rule-name">Cinsellik</span><span class="rule-penalty" style="--rule-color:#f5c518;">12 Saat</span></li>
+          <li><span class="rule-name">Ailevi Küfür</span><span class="rule-penalty" style="--rule-color:#f5c518;">12 Saat</span></li>
+          <li><span class="rule-name">Manevi Değerlere Küfür</span><span class="rule-penalty" style="--rule-color:#f5c518;">5 Saat</span></li>
+          <li><span class="rule-name">Dine Küfür</span><span class="rule-penalty" style="--rule-color:#f5c518;">5 Saat</span></li>
+        </ul>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-block-title" style="--rule-color:#c48bf5;">SÜRESİZ MUTELER</div>
+        <ul class="rule-list">
+          <li><span class="rule-name">Ailevi Değerlere Cinsel Küfür</span><span class="rule-penalty" style="--rule-color:#c48bf5;">Süresiz</span></li>
+        </ul>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-block-title" style="--rule-color:#ff6b6b;">BANLAMALAR</div>
+        <ul class="rule-list">
+          <li><span class="rule-name">Hile</span><span class="rule-penalty" style="--rule-color:#ff6b6b;">7 Gün</span></li>
+          <li><span class="rule-name">X-Ray</span><span class="rule-penalty" style="--rule-color:#ff6b6b;">3 Gün</span></li>
+          <li><span class="rule-name">Hileyle Trol</span><span class="rule-penalty" style="--rule-color:#ff6b6b;">12 Gün</span></li>
+        </ul>
+      </div>
+
+    </div>
   </section>
 
   <section id="iletisim">
@@ -440,11 +573,55 @@
     <p class="section-sub">İletişim bilgileri yakında eklenecek.</p>
   </section>
 
+  <section id="admin">
+    <div class="section-title">ADMİN PANELİ</div>
+    <p class="section-sub">RCON üzerinden sunucuya komut gönder</p>
+
+    <div id="adminLogin" style="max-width:420px;margin:0 auto;background:var(--bg-panel);border:2px solid var(--border);padding:26px;">
+      <div style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Admin anahtarını gir</div>
+      <input id="adminKeyInput" type="password" placeholder="Admin Key"
+        style="width:100%;padding:12px;background:var(--bg-deep);border:2px solid var(--border);color:var(--text);font-family:'Rubik',sans-serif;font-size:14px;margin-bottom:14px;">
+      <button class="cta" style="width:100%;font-size:11px;padding:14px;" onclick="adminLogin()">GİRİŞ YAP</button>
+      <div id="loginError" style="color:#ff6b6b;font-size:13px;margin-top:10px;"></div>
+    </div>
+
+    <div id="adminPanel" style="display:none;max-width:640px;margin:0 auto;">
+      <div style="background:var(--bg-panel);border:2px solid var(--border);padding:24px;margin-bottom:20px;">
+        <div class="staff-role" style="margin-bottom:14px;">CANLI OYUNCULAR</div>
+        <button class="rank-buy" style="border-color:var(--gold);color:var(--gold);" onclick="refreshPlayers()">Listeyi Yenile</button>
+        <pre id="playerList" style="margin-top:14px;color:var(--text);font-size:14px;white-space:pre-wrap;font-family:'Rubik',sans-serif;"></pre>
+      </div>
+
+      <div style="background:var(--bg-panel);border:2px solid var(--border);padding:24px;">
+        <div class="staff-role" style="margin-bottom:14px;">RCON KONSOLU</div>
+        <div style="display:flex;gap:10px;">
+          <input id="commandInput" type="text" placeholder="örn: say Merhaba herkese!"
+            style="flex:1;padding:12px;background:var(--bg-deep);border:2px solid var(--border);color:var(--text);font-family:'Rubik',sans-serif;font-size:14px;">
+          <button class="rank-buy" style="border-color:var(--green);color:var(--green);" onclick="sendCommand()">Gönder</button>
+        </div>
+        <pre id="commandOutput" style="margin-top:14px;color:var(--text-dim);font-size:13px;white-space:pre-wrap;font-family:'Rubik',sans-serif;min-height:20px;"></pre>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <footer>
   &copy; 2026 <b>Hovanetwork</b> — Tüm hakları saklıdır.
 </footer>
+
+<div class="modal-overlay" id="buyModal">
+  <div class="modal-box">
+    <div class="modal-rank" id="modalRankName">VIP</div>
+    <div class="modal-price" id="modalRankPrice">60₺</div>
+    <input id="modalUsername" type="text" placeholder="Minecraft kullanıcı adın" autocomplete="off">
+    <div class="modal-error" id="modalError"></div>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeBuyModal()">VAZGEÇ</button>
+      <button class="confirm" onclick="confirmBuy()">DEVAM ET</button>
+    </div>
+  </div>
+</div>
 
 <script>
   const tabs = document.querySelectorAll('nav .tab');
@@ -467,6 +644,133 @@
       setTimeout(() => el.textContent = old, 1200);
     });
   }
+
+  // ---- Mağaza: satın almadan önce Minecraft kullanıcı adı sor ----
+  let pendingRank = null;
+
+  function buyRank(rankName, price){
+    pendingRank = { rankName, price };
+    document.getElementById('modalRankName').textContent = rankName;
+    document.getElementById('modalRankPrice').textContent = price + '₺';
+    document.getElementById('modalUsername').value = '';
+    document.getElementById('modalError').textContent = '';
+    document.getElementById('buyModal').classList.add('active');
+    setTimeout(() => document.getElementById('modalUsername').focus(), 50);
+  }
+
+  function closeBuyModal(){
+    document.getElementById('buyModal').classList.remove('active');
+    pendingRank = null;
+  }
+
+  function confirmBuy(){
+    const usernameInput = document.getElementById('modalUsername');
+    const errEl = document.getElementById('modalError');
+    const username = usernameInput.value.trim();
+
+    if(!username){
+      errEl.textContent = 'Lütfen Minecraft kullanıcı adını gir.';
+      return;
+    }
+    if(!/^[A-Za-z0-9_]{3,16}$/.test(username)){
+      errEl.textContent = 'Geçerli bir Minecraft kullanıcı adı gir (3-16 karakter, harf/rakam/_ ).';
+      return;
+    }
+
+    // Burada gerçek ödeme sayfasına yönlendirme / backend isteği yapılabilir.
+    // Şimdilik satın alma talebini onaylıyoruz.
+    const rank = pendingRank;
+    closeBuyModal();
+    alert(username + ' adına ' + rank.rankName + ' rütbesi (' + rank.price + '₺) satın alma talebin alındı!\nÖdeme sonrası rütben bu kullanıcı adına tanımlanacak.');
+  }
+
+  document.getElementById('modalUsername')?.addEventListener('keydown', e => {
+    if(e.key === 'Enter') confirmBuy();
+  });
+  document.getElementById('buyModal')?.addEventListener('click', e => {
+    if(e.target.id === 'buyModal') closeBuyModal();
+  });
+
+  // ---- Sunucu durumu (server.js /api/status üzerinden) ----
+  async function checkStatus(){
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    try{
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      if(data.online){
+        dot.style.background = 'var(--green)';
+        dot.style.boxShadow = '0 0 8px var(--green)';
+        text.textContent = 'Çevrimiçi';
+        text.style.color = 'var(--green)';
+      } else {
+        throw new Error('offline');
+      }
+    } catch(e){
+      dot.style.background = '#ff6b6b';
+      dot.style.boxShadow = '0 0 8px #ff6b6b';
+      text.textContent = 'Çevrimdışı';
+      text.style.color = '#ff6b6b';
+    }
+  }
+  checkStatus();
+  setInterval(checkStatus, 30000);
+
+  // ---- Admin paneli (RCON) ----
+  let adminKey = '';
+
+  async function adminLogin(){
+    const key = document.getElementById('adminKeyInput').value.trim();
+    const errEl = document.getElementById('loginError');
+    errEl.textContent = '';
+    if(!key){ errEl.textContent = 'Anahtar boş olamaz.'; return; }
+    try{
+      const res = await fetch('/api/players', { headers: { 'x-admin-key': key } });
+      if(res.status === 401){ errEl.textContent = 'Anahtar hatalı.'; return; }
+      adminKey = key;
+      document.getElementById('adminLogin').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      refreshPlayers();
+    } catch(e){
+      errEl.textContent = 'Sunucuya bağlanılamadı (server.js çalışıyor mu?).';
+    }
+  }
+
+  async function refreshPlayers(){
+    const out = document.getElementById('playerList');
+    out.textContent = 'Yükleniyor...';
+    try{
+      const res = await fetch('/api/players', { headers: { 'x-admin-key': adminKey } });
+      const data = await res.json();
+      out.textContent = data.success ? data.result : ('Hata: ' + data.error);
+    } catch(e){
+      out.textContent = 'Bağlantı hatası.';
+    }
+  }
+
+  async function sendCommand(){
+    const input = document.getElementById('commandInput');
+    const out = document.getElementById('commandOutput');
+    const command = input.value.trim();
+    if(!command) return;
+    out.textContent = 'Gönderiliyor...';
+    try{
+      const res = await fetch('/api/command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+        body: JSON.stringify({ command })
+      });
+      const data = await res.json();
+      out.textContent = data.success ? ('> ' + command + '\n' + data.result) : ('Hata: ' + data.error);
+      input.value = '';
+    } catch(e){
+      out.textContent = 'Bağlantı hatası.';
+    }
+  }
+
+  document.getElementById('commandInput')?.addEventListener('keydown', e => {
+    if(e.key === 'Enter') sendCommand();
+  });
 </script>
 
 </body>
